@@ -4,19 +4,24 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using System;
 
-Console.WriteLine("Read: ");
-LibraryContext context = new LibraryContext();
-context.Database.EnsureDeleted();
-context.Database.EnsureCreated();
-Read_LINQ_Query_Syntax();
+Console.WriteLine("Create");
+CreateDatabase();
+Console.WriteLine("\nRead: ");
+Read();
 Console.WriteLine("\nUpdate: ");
 Update();
-Read_LINQ_Query_Syntax();
+Read();
 Console.WriteLine("\nDelete: ");
 Delete();
-Read_LINQ_Query_Syntax();
+Read();
 
-void Read_LINQ_Query_Syntax()
+void CreateDatabase()
+{
+    LibraryContext context = new LibraryContext();
+    context.Database.EnsureDeleted();
+    context.Database.EnsureCreated();
+}
+void Read()
 {
     LibraryContext context = new LibraryContext();
 
@@ -55,3 +60,4 @@ void Delete()
     context.Books.Remove(temp);
     context.SaveChanges();
 }
+
