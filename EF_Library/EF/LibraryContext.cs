@@ -11,8 +11,8 @@ public partial class LibraryContext : DbContext
 {
     public LibraryContext()
     {
-        Database.EnsureDeleted();
-        Database.EnsureCreated();
+        //Database.EnsureDeleted();
+        //Database.EnsureCreated();
     }
 
     public DbSet<Author> Authors { get; set; }
