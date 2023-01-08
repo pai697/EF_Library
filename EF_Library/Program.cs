@@ -43,12 +43,39 @@ Console.WriteLine("\nLazy loading");
 LazyLoading();
 Console.WriteLine("\nExplicit loading");
 ExplicitLoading();
+Console.WriteLine("\nAsNoTracing");
+AsNoTracking();
+Console.WriteLine("\nProcedure");
+Procedure();
+Console.WriteLine("\nFunction");
+Function();
 
 void CreateDatabase()
 {
     LibraryContext context = new LibraryContext();
     context.Database.EnsureDeleted();
     context.Database.EnsureCreated();
+
+    var createSql = @"
+                create procedure [dbo].[GetWorkers] as
+                begin
+                    select * from dbo.Worker
+                    order by Name desc
+                end
+            ";
+
+    context.Database.ExecuteSqlRaw(createSql);
+
+    createSql = @"
+                create function [dbo].[SearchBook] (@id int)
+                returns table
+                as
+                return
+                    select * from dbo.Book
+                    where Id = @id
+            ";
+
+    context.Database.ExecuteSqlRaw(createSql);
 }
 void Read()
 {
@@ -238,4 +265,50 @@ void LazyLoading()
     LibraryContext context = new LibraryContext();
     var readingRoom = context.ReadingRooms.ToList();
     readingRoom.ForEach(t => Console.WriteLine(t.Worker?.WorkerId));
+}
+
+void AsNoTracking()
+{
+    LibraryContext context = new LibraryContext();
+    var worker = context.Workers.AsNoTracking().FirstOrDefault();
+    if(worker != null)
+    {
+        worker.Name = "New name";
+        context.SaveChanges();
+    }
+
+    var workers = context.Workers.AsNoTracking().ToList();
+    foreach (var item in workers)
+        Console.WriteLine(item.Name);
+
+}
+
+void Procedure()
+{
+    LibraryContext context = new LibraryContext();
+
+    var workers = context
+        .Workers
+        .FromSqlRaw("EXECUTE dbo.GetWorkers").ToList();
+
+    foreach (var item in workers)
+    {
+        Console.WriteLine(
+            $"{item.WorkerId} " + $"{item.Name}");
+    }
+}
+
+void Function()
+{
+    LibraryContext context = new LibraryContext();
+
+    var books = context
+        .Books
+        .FromSqlRaw("SELECT * FROM dbo.SearchBook(2)").ToList();
+
+    foreach (var item in books)
+    {
+        Console.WriteLine(
+            $"{item.Id} " + $"{item.Name}");
+    }
 }
