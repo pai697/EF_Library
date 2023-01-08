@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EF_Library.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace EF_Library.EF;
 
@@ -51,7 +52,7 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Genre).HasMaxLength(30);
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.SerialNumber).HasMaxLength(30);
-
+            entity.Property(e => e.SerialNumber).HasDefaultValue("undefined");
             entity.HasOne(d => d.Author).WithMany(p => p.Books)
                 .HasForeignKey(d => d.AuthorId)
                 .HasConstraintName("FK_Book_AuthorId");
@@ -65,6 +66,7 @@ public partial class LibraryContext : DbContext
         {
             entity.HasKey(e => e.LocationId).HasName("PK_Location");
             entity.ToTable("Location");
+            entity.HasCheckConstraint("Shelf", "Shelf > 0 AND Shelf < 100", c => c.HasName("CK_Location_Shelf"));
         });
 
         modelBuilder.Entity<Reader>(entity =>
@@ -74,7 +76,7 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(30);
             entity.Property(e => e.MiddleName).HasMaxLength(30);
             entity.Property(e => e.Name).HasMaxLength(30);
-            entity.Property(e => e.Number).HasMaxLength(20);
+            entity.Property(e => e.Number).HasMaxLength(13);
             entity.Property(e => e.Surname).HasMaxLength(30);
         });
 
@@ -116,5 +118,70 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Position).HasMaxLength(30);
             entity.Property(e => e.Surname).HasMaxLength(30);
         });
+
+        Location location1 = new Location { LocationId = 1, Room = 1, Shelf = 1 };
+        Location location2 = new Location { LocationId = 2, Room = 2, Shelf = 3 };
+        Location location3 = new Location { LocationId = 3, Room = 3, Shelf = 3 };
+
+        Author author1 = new Author
+        {
+            Id = 1,
+            Name = "Name1",
+            MiddleName = "MiddleName1",
+            Surname = "Surname1"
+        };
+
+        Author author2 = new Author
+        {
+            Id = 2,
+            Name = "Name2",
+            MiddleName = "MiddleName2",
+            Surname = "Surname2"
+        };
+
+        Author author3 = new Author
+        {
+            Id = 3,
+            Name = "Name3",
+            MiddleName = "MiddleName3",
+            Surname = "Surname3"
+        };
+
+        Book book1 = new Book
+        {
+            Id = 1,
+            Name = "Book1",
+            Genre = "Genre1",
+            DateTaken = DateTime.Now,
+            SerialNumber = "1111",
+            Location = location1.LocationId,
+            AuthorId = author1.Id
+        };
+
+        Book book2 = new Book
+        {
+            Id = 2,
+            Name = "Book2",
+            Genre = "Genre2",
+            DateTaken = DateTime.Now.AddYears(1),
+            SerialNumber = "2222",
+            Location = location2.LocationId,
+            AuthorId = author2.Id
+        };
+
+        Book book3 = new Book
+        {
+            Id = 3,
+            Name = "Book3",
+            Genre = "Genre3",
+            DateTaken = DateTime.Now.AddDays(1),
+            SerialNumber = "3333",
+            Location = location3.LocationId,
+            AuthorId = author3.Id
+        };
+        
+        modelBuilder.Entity<Author>().HasData(author1, author2, author3);
+        modelBuilder.Entity<Location>().HasData(location1, location2, location3);
+        modelBuilder.Entity<Book>().HasData(book1, book2, book3);
     }
 }
