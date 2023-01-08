@@ -37,7 +37,7 @@ CreateDatabase();
 //GroupBy();
 //Console.WriteLine("\nCount:");
 //Count();
-//Console.WriteLine("\nEager loading");
+Console.WriteLine("\nEager loading");
 EagerLoading();
 Console.WriteLine("\nLazy loading");
 LazyLoading();
@@ -229,5 +229,11 @@ void LazyLoading()
 
 void ExplicitLoading()
 {
-
+    LibraryContext context = new LibraryContext();
+    ReadingRoom? readingRoom = context.ReadingRooms.FirstOrDefault();
+    if(readingRoom != null)
+    {
+        context.Entry(readingRoom).Reference(p => p.Worker).Load();
+        Console.WriteLine(readingRoom.Worker?.WorkerId);
+    }
 }
