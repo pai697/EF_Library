@@ -9,6 +9,6 @@ public partial class Worker
     public string Position { get; set; }
     public string Name { get; set; }
     public string Surname { get; set; }
-    public List<ReadingRoom> ReadingRooms { get; set; }
-    public List<RentedBook> RentedBooks { get; set; }
+    public virtual List<ReadingRoom> ReadingRooms { get; set; }
+    public virtual List<RentedBook> RentedBooks { get; set; }
 }
