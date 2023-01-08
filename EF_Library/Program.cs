@@ -222,11 +222,6 @@ void EagerLoading()
     readingRoom.ForEach(t => Console.WriteLine(t.Worker?.WorkerId));
 }
 
-void LazyLoading()
-{
-
-}
-
 void ExplicitLoading()
 {
     LibraryContext context = new LibraryContext();

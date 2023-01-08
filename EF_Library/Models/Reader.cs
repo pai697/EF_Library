@@ -13,5 +13,5 @@ public partial class Reader
     public string Surname { get; set; }
     public string Email { get; set; }
     [Required][MaxLength(13)] public string Number { get; set; }
-    public List<RentedBook> RentedBooks { get; set; }
+    public virtual List<RentedBook> RentedBooks { get; set; }
 }

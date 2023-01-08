@@ -31,7 +31,9 @@ public partial class LibraryContext : DbContext
         var config = builder.Build();
         string connectionString = config.GetConnectionString("DefaultConnection");
 
-        optionsBuilder.UseSqlServer(connectionString);
+        optionsBuilder
+            .UseLazyLoadingProxies() // lazy loading
+            .UseSqlServer(connectionString);
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

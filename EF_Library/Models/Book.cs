@@ -11,11 +11,11 @@ public partial class Book
     public string Name { get; set; }
     [Required]
     public int AuthorId { get; set; }
-    public Author Author { get; set; }
+    public virtual Author Author { get; set; }
     public string Genre { get; set; }
     public DateTime DateTaken { get; set; }
     public int Location { get; set; }
-    public Location LocationNavigation { get; set; }
+    public virtual Location LocationNavigation { get; set; }
     public string SerialNumber { get; set; }
-    public List<RentedBook> RentedBooks { get; set; }
+    public virtual List<RentedBook> RentedBooks { get; set; }
 }
