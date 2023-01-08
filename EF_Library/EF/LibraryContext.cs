@@ -179,9 +179,114 @@ public partial class LibraryContext : DbContext
             Location = location3.LocationId,
             AuthorId = author3.Id
         };
-        
+
+        Worker worker1 = new Worker
+        {
+            WorkerId = 1,
+            Position = "position1",
+            Name = "name1",
+            Surname = "surname1",
+        };
+
+        Worker worker2 = new Worker
+        {
+            WorkerId = 2,
+            Position = "position2",
+            Name = "name2",
+            Surname = "surname2",
+        };
+
+        Worker worker3 = new Worker
+        {
+            WorkerId = 3,
+            Position = "position3",
+            Name = "name3",
+            Surname = "surname3",
+        };
+
+        Reader reader1 = new Reader
+        {
+            ReaderId = 1,
+            Name = "name1",
+            MiddleName = "middle1",
+            Surname = "surname1",
+            Email = "1@email.com",
+            Number = "380671234201"
+        };
+        Reader reader2 = new Reader
+        {
+            ReaderId = 2,
+            Name = "name2",
+            MiddleName = "middle2",
+            Surname = "surname2",
+            Email = "2@email.com",
+            Number = "380671234202"
+        };
+
+        Reader reader3 = new Reader
+        {
+            ReaderId = 3,
+            Name = "name3",
+            MiddleName = "middle3",
+            Surname = "surname3",
+            Email = "3@email.com",
+            Number = "380671234203"
+        };
+
+        ReadingRoom readingroom1 = new ReadingRoom
+        {
+            ReadingRoomId = 1,
+            WorkerId = worker1.WorkerId,
+            Room = 1
+        };
+
+        ReadingRoom readingroom2 = new ReadingRoom
+        {
+            ReadingRoomId = 2,
+            WorkerId = worker2.WorkerId,
+            Room = 2
+        };
+
+        ReadingRoom readingroom3 = new ReadingRoom
+        {
+            ReadingRoomId = 13,
+            WorkerId = worker3.WorkerId,
+            Room = 3
+        };
+
+        RentedBook rentedbook1 = new RentedBook
+        {
+            ReaderId = reader1.ReaderId,
+            BookId = book1.Id,
+            BeginDate = DateTime.Now,
+            EndDate = DateTime.Now.AddDays(5),
+            WorkerId = worker1.WorkerId
+        };
+
+        RentedBook rentedbook2 = new RentedBook
+        {
+            ReaderId = reader2.ReaderId,
+            BookId = book2.Id,
+            BeginDate = DateTime.Now,
+            EndDate = DateTime.Now.AddDays(2),
+            WorkerId = worker2.WorkerId
+        };
+
+        RentedBook rentedbook3 = new RentedBook
+        {
+            ReaderId = reader3.ReaderId,
+            BookId = book3.Id,
+            BeginDate = DateTime.Now,
+            EndDate = DateTime.Now.AddDays(4),
+            WorkerId = worker3.WorkerId
+        };
+
         modelBuilder.Entity<Author>().HasData(author1, author2, author3);
         modelBuilder.Entity<Location>().HasData(location1, location2, location3);
         modelBuilder.Entity<Book>().HasData(book1, book2, book3);
+        modelBuilder.Entity<Worker>().HasData(worker1, worker2, worker3);
+        modelBuilder.Entity<Reader>().HasData(reader1, reader2, reader3);
+        modelBuilder.Entity<ReadingRoom>().HasData(readingroom1, readingroom2, readingroom3);
+        modelBuilder.Entity<RentedBook>().HasData(rentedbook1, rentedbook2, rentedbook3);
     }
 }
