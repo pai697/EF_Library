@@ -1,12 +1,12 @@
-﻿using EF_Library.EF;
+﻿using Azure.Core;
+using EF_Library;
+using EF_Library.EF;
 using EF_Library.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
+using Microsoft.Extensions.Options;
+using System.Diagnostics.Metrics;
+using System.Threading;
 
 Console.WriteLine("Create database!");
 CreateDatabase();
@@ -37,18 +37,30 @@ CreateDatabase();
 //GroupBy();
 //Console.WriteLine("\nCount:");
 //Count();
-Console.WriteLine("\nEager loading");
-EagerLoading();
-Console.WriteLine("\nLazy loading");
-LazyLoading();
-Console.WriteLine("\nExplicit loading");
-ExplicitLoading();
-Console.WriteLine("\nAsNoTracing");
-AsNoTracking();
-Console.WriteLine("\nProcedure");
-Procedure();
-Console.WriteLine("\nFunction");
-Function();
+//Console.WriteLine("\nEager loading");
+//EagerLoading();
+//Console.WriteLine("\nLazy loading");
+//LazyLoading();
+//Console.WriteLine("\nExplicit loading");
+//ExplicitLoading();
+//Console.WriteLine("\nAsNoTracing");
+//AsNoTracking();
+//Console.WriteLine("\nProcedure");
+//Procedure();
+//Console.WriteLine("\nFunction");
+//Function();
+//Console.WriteLine("\nAsync add");
+//await AsyncAdd();
+//Console.WriteLine("Async read:");
+//await AsyncRead();
+//Console.WriteLine("\nMutex write");
+MutexWrite();
+//Console.WriteLine("\nMutex read:");
+MutexRead();
+//Console.WriteLine("\nLock write");
+LockWrite();
+//Console.WriteLine("\nLock read:");
+LockRead();
 
 void CreateDatabase()
 {
@@ -92,7 +104,6 @@ void Read()
 
     foreach (var item in query)
     {
-        Console.WriteLine("----------------------------------------------------------");
         Console.WriteLine($"Book: {item.Book.Name} {item.Book.Author.Id}");
         Console.WriteLine($"Author: {item.Author.Name} {item.Author.Surname}");
     }
@@ -122,7 +133,6 @@ void Delete()
         Console.WriteLine(line.Name + " " + line.Surname + " " + line.WorkerId);
     }
 }
-
 void Insert()
 {
     LibraryContext context = new LibraryContext();
@@ -253,7 +263,7 @@ void ExplicitLoading()
 {
     LibraryContext context = new LibraryContext();
     ReadingRoom? readingRoom = context.ReadingRooms.FirstOrDefault();
-    if(readingRoom != null)
+    if (readingRoom != null)
     {
         context.Entry(readingRoom).Reference(p => p.Worker).Load();
         Console.WriteLine(readingRoom.Worker?.WorkerId);
@@ -271,7 +281,7 @@ void AsNoTracking()
 {
     LibraryContext context = new LibraryContext();
     var worker = context.Workers.AsNoTracking().FirstOrDefault();
-    if(worker != null)
+    if (worker != null)
     {
         worker.Name = "New name";
         context.SaveChanges();
@@ -310,5 +320,118 @@ void Function()
     {
         Console.WriteLine(
             $"{item.Id} " + $"{item.Name}");
+    }
+}
+
+async Task AsyncAdd()
+{
+    LibraryContext context = new LibraryContext();
+    for (int i = 0; i < 10; i++)
+    {
+        await context.Workers.AddAsync(new Worker
+        {
+            Name = i.ToString(),
+            Surname = i.ToString(),
+            Position = i.ToString()
+        });
+        await context.SaveChangesAsync();
+    }
+}
+
+async Task AsyncRead()
+{
+    LibraryContext context = new LibraryContext();
+    var list = await context.Workers.ToListAsync();
+    foreach (var it in list)
+    {
+        Console.WriteLine(it.Name);
+    }
+}
+
+void MutexRead()
+{
+    using (LibraryContext context = new LibraryContext())
+    {
+        var list = context.Workers.ToList();
+        Mutex mutex = new Mutex();
+        foreach (var it in list)
+        {
+            Thread.Sleep(100);
+            Thread newThread = new(() =>
+            {
+                mutex.WaitOne();
+                Console.WriteLine(it.Name);
+                mutex.ReleaseMutex();
+            });
+            newThread.Start();
+        }
+    }
+}
+
+void MutexWrite()
+{
+    Mutex mutex = new Mutex();
+    LibraryContext context = new LibraryContext();
+    for (int i = 0; i < 10; i++)
+    {
+        Thread.Sleep(500);
+        Thread myThread = new(() =>
+        {
+            mutex.WaitOne();
+            context.Workers.Add(new Worker
+            {
+                Name = i.ToString(),
+                Surname = i.ToString(),
+                Position = i.ToString()
+            });
+            context.SaveChanges();
+            mutex.ReleaseMutex();
+        });
+        myThread.Start();
+    }
+}
+
+void LockRead()
+{
+    using (LibraryContext context = new LibraryContext())
+    {
+        var list = context.Workers.ToList();
+        object locker = new object();
+        foreach (var it in list)
+        {
+            Thread.Sleep(100);
+            Thread newThread = new(() =>
+            {
+                lock (locker)
+                {
+                    Console.WriteLine(it.Name);
+                }
+            });
+            newThread.Start();
+        }
+    }
+}
+
+void LockWrite()
+{
+    object locker = new object();
+    LibraryContext context = new LibraryContext();
+    for (int i = 0; i < 10; i++)
+    {
+        Thread.Sleep(500);
+        Thread myThread = new(() =>
+        {
+            lock (locker)
+            {
+                context.Workers.Add(new Worker
+                {
+                    Name = i.ToString(),
+                    Surname = i.ToString(),
+                    Position = i.ToString()
+                });
+                context.SaveChanges();
+            }
+        });
+        myThread.Start();
     }
 }
