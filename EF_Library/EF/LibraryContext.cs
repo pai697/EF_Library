@@ -29,7 +29,7 @@ public partial class LibraryContext : DbContext
         builder.SetBasePath(Directory.GetCurrentDirectory());
         builder.AddJsonFile("appsettings.json");
         var config = builder.Build();
-        string connectionString = config.GetConnectionString("DefaultConnection");
+        string? connectionString = config.GetConnectionString("DefaultConnection");
 
         optionsBuilder
             .UseLazyLoadingProxies() // lazy loading
@@ -68,7 +68,7 @@ public partial class LibraryContext : DbContext
         {
             entity.HasKey(e => e.LocationId).HasName("PK_Location");
             entity.ToTable("Location");
-            entity.HasCheckConstraint("Shelf", "Shelf > 0 AND Shelf < 100", c => c.HasName("CK_Location_Shelf"));
+            entity.ToTable(t => t.HasCheckConstraint("Shelf", "Shelf > 0 AND Shelf < 100"));
         });
 
         modelBuilder.Entity<Reader>(entity =>

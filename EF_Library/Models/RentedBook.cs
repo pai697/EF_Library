@@ -11,7 +11,7 @@ public partial class RentedBook
     public DateTime EndDate { get; set; }
     public int WorkerId { get; set; }
     // navigation properties
-    public virtual Book Book { get; set; }
-    public virtual Reader Reader { get; set; }
-    public virtual Worker Worker { get; set; }
+    public virtual Book Book { get; set; } = null!;
+    public virtual Reader Reader { get; set; } = null!;
+    public virtual Worker Worker { get; set; } = null!;
 }

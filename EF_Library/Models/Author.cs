@@ -8,8 +8,8 @@ public partial class Author
 {
     public int Id { get; set; }
     [Required]
-    public string Name { get; set; }
-    public string MiddleName { get; set; }
-    public string Surname { get; set; }
-    public virtual List<Book> Books { get; set; }
+    public string Name { get; set; } = null!;
+    public string MiddleName { get; set; } = null!;
+    public string Surname { get; set; } = null!;
+    public virtual List<Book> Books { get; set; } = new List<Book>();
 }
