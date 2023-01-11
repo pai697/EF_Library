@@ -182,6 +182,17 @@ public partial class LibraryContext : DbContext
             AuthorId = author3.Id
         };
 
+        Book book4 = new Book
+        {
+            Id = 4,
+            Name = "Book4",
+            Genre = "Genre4",
+            DateTaken = DateTime.Now.AddDays(1),
+            SerialNumber = "4444",
+            Location = location3.LocationId,
+            AuthorId = author3.Id
+        };
+
         Worker worker1 = new Worker
         {
             WorkerId = 1,
@@ -285,7 +296,7 @@ public partial class LibraryContext : DbContext
 
         modelBuilder.Entity<Author>().HasData(author1, author2, author3);
         modelBuilder.Entity<Location>().HasData(location1, location2, location3);
-        modelBuilder.Entity<Book>().HasData(book1, book2, book3);
+        modelBuilder.Entity<Book>().HasData(book1, book2, book3, book4);
         modelBuilder.Entity<Worker>().HasData(worker1, worker2, worker3);
         modelBuilder.Entity<Reader>().HasData(reader1, reader2, reader3);
         modelBuilder.Entity<ReadingRoom>().HasData(readingroom1, readingroom2, readingroom3);

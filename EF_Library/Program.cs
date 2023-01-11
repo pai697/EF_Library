@@ -10,57 +10,32 @@ using System.Threading;
 
 Console.WriteLine("Create database!");
 CreateDatabase();
-Console.WriteLine("Read: ");
-Read();
-Console.WriteLine("\nUpdate: ");
-Update();
-Read();
-Console.WriteLine("\nDelete: ");
-Delete();
-Console.WriteLine("\nInsert:");
-Insert();
-Console.WriteLine("\nDistinct:");
-Distinct();
-Console.WriteLine("\nTop:");
-Top();
-Console.WriteLine("\nOrder by:");
-OrderBy();
-Console.WriteLine("\nUnion:");
-Union();
-Console.WriteLine("\nExcept:");
-Except();
-Console.WriteLine("\nIntersect:");
-Intersect();
-Console.WriteLine("\nJoin:");
-Join();
-Console.WriteLine("\nGroup by:");
-GroupBy();
-Console.WriteLine("\nCount:");
-Count();
-Console.WriteLine("\nEager loading");
-EagerLoading();
-Console.WriteLine("\nLazy loading");
-LazyLoading();
-Console.WriteLine("\nExplicit loading");
-ExplicitLoading();
-Console.WriteLine("\nAsNoTracing");
-AsNoTracking();
-Console.WriteLine("\nProcedure");
-Procedure();
-Console.WriteLine("\nFunction");
-Function();
-Console.WriteLine("\nAsync add");
-await AsyncAdd();
-Console.WriteLine("Async read:");
-await AsyncRead();
-Console.WriteLine("\nMutex write");
-MutexWrite();
-Console.WriteLine("\nMutex read:");
-MutexRead();
-Console.WriteLine("\nLock write");
-LockWrite();
-Console.WriteLine("\nLock read:");
-LockRead();
+MostPopularAuthors();
+
+// Захист 3 роботи
+void MostPopularAuthors()
+{
+    LibraryContext context = new LibraryContext();
+    var query = context.Books.
+            Join(context.Authors,
+            book => book.AuthorId,
+            author => author.Id,
+            (book, author) => new { Author = author.Id, Book = book.Id})
+            .GroupBy(p => p.Author)
+            .Select(m => new
+            {
+                m.Key,
+                Count = m.Count()
+            })
+            .OrderByDescending(p => p.Count)
+            .Take(3);
+    foreach(var it in query)
+    {
+        Console.WriteLine("Id: " + it.Key);
+        Console.WriteLine("Count: " + it.Count);
+        Console.WriteLine("-----");
+    }
+}
 
 void CreateDatabase()
 {
