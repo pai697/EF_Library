@@ -11,7 +11,7 @@ public partial class Book
     public string Name { get; set; } = null!;
     [Required]
     public int AuthorId { get; set; }
-    public virtual Author Author { get; set; } = null!;
+    public virtual List<Author> Authors { get; set; } = null!;
     public string Genre { get; set; } = null!;
     public DateTime DateTaken { get; set; }
     public int Location { get; set; }

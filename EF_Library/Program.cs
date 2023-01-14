@@ -68,15 +68,11 @@ void Read()
 {
     LibraryContext context = new LibraryContext();
 
-    var query =
-        from book in context.Books
-        join author in context.Authors on book.AuthorId equals author.Id
-        select new { Book = book, Author = author, };
+    var query = context.Authors.ToList();
 
     foreach (var item in query)
     {
-        Console.WriteLine($"Book: {item.Book.Name} {item.Book.Author.Id}");
-        Console.WriteLine($"Author: {item.Author.Name} {item.Author.Surname}");
+        Console.WriteLine($"Author: {item.Name} {item.Surname}");
     }
 }
 
@@ -94,14 +90,14 @@ void Update()
 void Delete()
 {
     LibraryContext context = new LibraryContext();
-    var temp = context.Workers.Where(x => x.WorkerId == 3).Single();
+    var temp = context.Workers.Where(x => x.Id == 3).Single();
     context.Workers.Remove(temp);
     context.SaveChanges();
 
     var query = from row in context.Workers select row;
     foreach (var line in query)
     {
-        Console.WriteLine(line.Name + " " + line.Surname + " " + line.WorkerId);
+        Console.WriteLine(line.Name + " " + line.Surname + " " + line.Id);
     }
 }
 void Insert()
@@ -120,7 +116,7 @@ void Insert()
     var query = from row in context.Workers select row;
     foreach (var line in query)
     {
-        Console.WriteLine(line.Name + " " + line.Surname + " " + line.WorkerId);
+        Console.WriteLine(line.Name + " " + line.Surname + " " + line.Id);
     }
 }
 
@@ -195,7 +191,7 @@ void Join()
     LibraryContext context = new LibraryContext();
     var query =
         from t in context.ReadingRooms
-        join c in context.Workers on t.WorkerId equals c.WorkerId
+        join c in context.Workers on t.WorkerId equals c.Id
         select new { t, c };
     foreach (var t in query)
     {
@@ -208,7 +204,7 @@ void GroupBy()
     LibraryContext context = new LibraryContext();
     var query =
         from t in context.Workers
-        join c in context.ReadingRooms on t.WorkerId equals c.WorkerId
+        join c in context.ReadingRooms on t.Id equals c.WorkerId
         group t by t.Name;
     foreach (var g in query)
     {
@@ -230,7 +226,7 @@ void EagerLoading()
     LibraryContext context = new LibraryContext();
     // var readingRoom = context.ReadingRooms.ToList(); will get empty list
     var readingRoom = context.ReadingRooms.Include(u => u.Worker).ToList();
-    readingRoom.ForEach(t => Console.WriteLine(t.Worker?.WorkerId));
+    readingRoom.ForEach(t => Console.WriteLine(t.Worker?.Id));
 }
 
 void ExplicitLoading()
@@ -240,7 +236,7 @@ void ExplicitLoading()
     if (readingRoom != null)
     {
         context.Entry(readingRoom).Reference(p => p.Worker).Load();
-        Console.WriteLine(readingRoom.Worker?.WorkerId);
+        Console.WriteLine(readingRoom.Worker?.Id);
     }
 }
 
@@ -248,7 +244,7 @@ void LazyLoading()
 {
     LibraryContext context = new LibraryContext();
     var readingRoom = context.ReadingRooms.ToList();
-    readingRoom.ForEach(t => Console.WriteLine(t.Worker?.WorkerId));
+    readingRoom.ForEach(t => Console.WriteLine(t.Worker?.Id));
 }
 
 void AsNoTracking()
@@ -274,7 +270,7 @@ void Procedure()
 
     foreach (var item in workers)
     {
-        Console.WriteLine($"{item.WorkerId} " + $"{item.Name}");
+        Console.WriteLine($"{item.Id} " + $"{item.Name}");
     }
 }
 

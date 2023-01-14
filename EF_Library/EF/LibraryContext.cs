@@ -15,6 +15,7 @@ public partial class LibraryContext : DbContext
         //Database.EnsureCreated();
     }
 
+    public DbSet<Person> Persons { get; set; }
     public DbSet<Author> Authors { get; set; }
     public DbSet<Book> Books { get; set; }
     public DbSet<Location> Locations { get; set; }
@@ -37,14 +38,31 @@ public partial class LibraryContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Author>(entity =>
+        modelBuilder.Entity<Person>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Author");
             entity.ToTable("Author");
             entity.Property(e => e.MiddleName).HasMaxLength(30);
             entity.Property(e => e.Name).HasMaxLength(30);
             entity.Property(e => e.Surname).HasMaxLength(30);
+            // Пiдхiд TPH - одна таблиця на всi нащадки
+            // Колонка Discriminator визначає тип нащадка
+            entity.ToTable("Person").HasDiscriminator<string>("Discriminator").HasValue<Person>("Person");
+            entity.ToTable("Worker").HasDiscriminator<string>("Discriminator").HasValue<Worker>("Worker");
+            entity.ToTable("Author").HasDiscriminator<string>("Discriminator").HasValue<Author>("Author");
         });
+
+        // Пiдхiд TPC - нова таблиця для кожного класу ієрархії що містить лише поля додані в нащадку 
+        // modelBuilder.Entity<Worker>(entity =>
+        // {
+        //     entity.ToTable("Worker");
+        //     entity.Property(e => e.Position).HasMaxLength(30);
+        // });
+
+        // modelBuilder.Entity<Author>(entity =>
+        // {
+        //     entity.ToTable("Author");
+        // });
 
         modelBuilder.Entity<Book>(entity =>
         {
@@ -55,7 +73,7 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.SerialNumber).HasMaxLength(30);
             entity.Property(e => e.SerialNumber).HasDefaultValue("undefined");
-            entity.HasMany(d => d.Author).WithMany(p => p.Books).UsingEntity(p => p.ToTable("AuthorBook"));
+            entity.HasMany(d => d.Authors).WithMany(e => e.Books).UsingEntity(p => p.ToTable("AuthorBook"));
             entity.HasOne(d => d.LocationNavigation).WithMany(p => p.Books)
                 .HasForeignKey(d => d.Location)
                 .HasConstraintName("FK_Book_Location");
@@ -107,15 +125,6 @@ public partial class LibraryContext : DbContext
             entity.HasOne(d => d.Worker).WithMany(p => p.RentedBooks)
                 .HasForeignKey(d => d.WorkerId)
                 .HasConstraintName("FK_RentedBook_Worker");
-        });
-
-        modelBuilder.Entity<Worker>(entity =>
-        {
-            entity.HasKey(e => e.WorkerId).HasName("PK_Worker");
-            entity.ToTable("Worker");
-            entity.Property(e => e.Name).HasMaxLength(30);
-            entity.Property(e => e.Position).HasMaxLength(30);
-            entity.Property(e => e.Surname).HasMaxLength(30);
         });
 
         Location location1 = new Location { LocationId = 1, Room = 1, Shelf = 1 };
@@ -192,26 +201,29 @@ public partial class LibraryContext : DbContext
 
         Worker worker1 = new Worker
         {
-            WorkerId = 1,
+            Id = 4,
             Position = "position1",
             Name = "name1",
             Surname = "surname1",
+            MiddleName = "middle1"
         };
 
         Worker worker2 = new Worker
         {
-            WorkerId = 2,
+            Id = 5,
             Position = "position2",
             Name = "name2",
             Surname = "surname2",
+            MiddleName = "middle2"
         };
 
         Worker worker3 = new Worker
         {
-            WorkerId = 3,
+            Id = 6,
             Position = "position3",
             Name = "name3",
             Surname = "surname3",
+            MiddleName = "middle3"
         };
 
         Reader reader1 = new Reader
@@ -246,21 +258,21 @@ public partial class LibraryContext : DbContext
         ReadingRoom readingroom1 = new ReadingRoom
         {
             ReadingRoomId = 1,
-            WorkerId = worker1.WorkerId,
+            WorkerId = worker1.Id,
             Room = 1
         };
 
         ReadingRoom readingroom2 = new ReadingRoom
         {
             ReadingRoomId = 2,
-            WorkerId = worker2.WorkerId,
+            WorkerId = worker2.Id,
             Room = 2
         };
 
         ReadingRoom readingroom3 = new ReadingRoom
         {
             ReadingRoomId = 13,
-            WorkerId = worker3.WorkerId,
+            WorkerId = worker3.Id,
             Room = 3
         };
 
@@ -270,7 +282,7 @@ public partial class LibraryContext : DbContext
             BookId = book1.Id,
             BeginDate = DateTime.Now,
             EndDate = DateTime.Now.AddDays(5),
-            WorkerId = worker1.WorkerId
+            WorkerId = worker1.Id
         };
 
         RentedBook rentedbook2 = new RentedBook
@@ -279,7 +291,7 @@ public partial class LibraryContext : DbContext
             BookId = book2.Id,
             BeginDate = DateTime.Now,
             EndDate = DateTime.Now.AddDays(2),
-            WorkerId = worker2.WorkerId
+            WorkerId = worker2.Id
         };
 
         RentedBook rentedbook3 = new RentedBook
@@ -288,7 +300,7 @@ public partial class LibraryContext : DbContext
             BookId = book3.Id,
             BeginDate = DateTime.Now,
             EndDate = DateTime.Now.AddDays(4),
-            WorkerId = worker3.WorkerId
+            WorkerId = worker3.Id
         };
 
         modelBuilder.Entity<Author>().HasData(author1, author2, author3);
