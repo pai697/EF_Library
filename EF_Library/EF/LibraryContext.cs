@@ -55,10 +55,7 @@ public partial class LibraryContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.SerialNumber).HasMaxLength(30);
             entity.Property(e => e.SerialNumber).HasDefaultValue("undefined");
-            entity.HasOne(d => d.Author).WithMany(p => p.Books)
-                .HasForeignKey(d => d.AuthorId)
-                .HasConstraintName("FK_Book_AuthorId");
-
+            entity.HasMany(d => d.Author).WithMany(p => p.Books).UsingEntity(p => p.ToTable("AuthorBook"));
             entity.HasOne(d => d.LocationNavigation).WithMany(p => p.Books)
                 .HasForeignKey(d => d.Location)
                 .HasConstraintName("FK_Book_Location");
