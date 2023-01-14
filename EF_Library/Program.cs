@@ -10,7 +10,8 @@ using System.Threading;
 
 Console.WriteLine("Create database!");
 CreateDatabase();
-MostPopularAuthors();
+LockWrite();
+// WriteWithoutLocking();
 
 // Захист 3 роботи
 void MostPopularAuthors()
@@ -64,6 +65,7 @@ void CreateDatabase()
 
     context.Database.ExecuteSqlRaw(createSql);
 }
+
 void Read()
 {
     LibraryContext context = new LibraryContext();
@@ -100,6 +102,7 @@ void Delete()
         Console.WriteLine(line.Name + " " + line.Surname + " " + line.Id);
     }
 }
+
 void Insert()
 {
     LibraryContext context = new LibraryContext();
@@ -296,6 +299,7 @@ async Task AsyncAdd()
             {
                 Name = i.ToString(),
                 Surname = i.ToString(),
+                MiddleName = i.ToString(),
                 Position = i.ToString()
             }
         );
@@ -313,50 +317,51 @@ async Task AsyncRead()
     }
 }
 
-void MutexRead()
+void ReadWithoutLocking()
 {
     using (LibraryContext context = new LibraryContext())
     {
         var list = context.Workers.ToList();
-        Mutex mutex = new Mutex();
         foreach (var it in list)
         {
             Thread.Sleep(100);
             Thread newThread =
                 new(() =>
                 {
-                    mutex.WaitOne();
                     Console.WriteLine(it.Name);
-                    mutex.ReleaseMutex();
                 });
             newThread.Start();
         }
     }
 }
 
-void MutexWrite()
+void WriteWithoutLocking()
 {
-    Mutex mutex = new Mutex();
     LibraryContext context = new LibraryContext();
+    int count = 0;
     for (int i = 0; i < 10; i++)
     {
-        Thread.Sleep(500);
-        Thread myThread =
-            new(() =>
-            {
-                mutex.WaitOne();
-                context.Workers.Add(
-                    new Worker
-                    {
-                        Name = i.ToString(),
-                        Surname = i.ToString(),
-                        Position = i.ToString()
-                    }
-                );
-                context.SaveChanges();
-                mutex.ReleaseMutex();
-            });
-        myThread.Start();
+        for (int j = 0; j < 100; j++)
+        {
+            Thread.Sleep(100);
+            Thread myThread =
+                new(() =>
+                {
+                    context.Workers.Add(
+                        new Worker
+                        {
+                            Name = count.ToString(),
+                            Surname = count.ToString(),
+                            MiddleName = count.ToString(),
+                            Position = count.ToString()
+                        }
+                    );
+                    context.SaveChanges();
+                });
+            myThread.Start();
+            Console.WriteLine(count);
+            count++;
+        }
     }
 }
 
@@ -372,6 +377,7 @@ void LockRead()
             Thread newThread =
                 new(() =>
                 {
+                    LibraryContext context = new LibraryContext();
                     lock (locker)
                     {
                         Console.WriteLine(it.Name);
@@ -385,26 +391,33 @@ void LockRead()
 void LockWrite()
 {
     object locker = new object();
-    LibraryContext context = new LibraryContext();
+    int count = 0;
     for (int i = 0; i < 10; i++)
     {
-        Thread.Sleep(500);
-        Thread myThread =
-            new(() =>
-            {
-                lock (locker)
+        for (int j = 0; j < 100; j++)
+        {
+            Thread.Sleep(100);
+            Thread myThread =
+                new(() =>
                 {
-                    context.Workers.Add(
-                        new Worker
-                        {
-                            Name = i.ToString(),
-                            Surname = i.ToString(),
-                            Position = i.ToString()
-                        }
-                    );
-                    context.SaveChanges();
-                }
-            });
-        myThread.Start();
+                    LibraryContext context = new LibraryContext();
+                    lock (locker)
+                    {
+                        context.Workers.Add(
+                            new Worker
+                            {
+                                Name = count.ToString(),
+                                Surname = count.ToString(),
+                                MiddleName = count.ToString(),
+                                Position = count.ToString()
+                            }
+                        );
+                        context.SaveChanges();
+                    }
+                });
+            myThread.Start();
+            Console.WriteLine(count);
+            count++;
+        }
     }
 }

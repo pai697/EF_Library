@@ -48,8 +48,8 @@ public partial class LibraryContext : DbContext
             // Пiдхiд TPH - одна таблиця на всi нащадки
             // Колонка Discriminator визначає тип нащадка
             entity.ToTable("Person").HasDiscriminator<string>("Discriminator").HasValue<Person>("Person");
-            entity.ToTable("Worker").HasDiscriminator<string>("Discriminator").HasValue<Worker>("Worker");
-            entity.ToTable("Author").HasDiscriminator<string>("Discriminator").HasValue<Author>("Author");
+            entity.ToTable("Person").HasDiscriminator<string>("Discriminator").HasValue<Worker>("Worker");
+            entity.ToTable("Person").HasDiscriminator<string>("Discriminator").HasValue<Author>("Author");
         });
 
         // Пiдхiд TPC - нова таблиця для кожного класу ієрархії що містить лише поля додані в нащадку 
